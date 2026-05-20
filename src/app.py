@@ -30,32 +30,55 @@ def sitemap():
 
 
 @app.route('/members', methods=['GET'])
-def handle_hello():
-    
+def get_all_members():
+
     members = jackson_family.get_all_members()
-    
+
     return jsonify(members), 200
+
 
 @app.route('/members', methods=['POST'])
 def add_member():
 
-    body = request.json
+    body = request.get_json()
+
     new_member = jackson_family.add_member(body)
 
     return jsonify(new_member), 200
 
-@app.route('/members/<int:member_id>', methods=['DELETE'])
-def delete_member(member_id):
-
-    jackson_family.delete_member(member_id)
-    return jsonify({"done": True}), 200
 
 @app.route('/members/<int:member_id>', methods=['GET'])
-def get_members(member_id):
+def get_member(member_id):
 
     member = jackson_family.get_member(member_id)
 
+    if member is None:
+        return jsonify({"msg": "Member not found"}), 404
+
     return jsonify(member), 200
+
+
+@app.route('/members/<int:member_id>', methods=['DELETE'])
+def delete_member(member_id):
+
+    deleted = jackson_family.delete_member(member_id)
+
+    if deleted == False:
+        return jsonify({"msg": "No se encontro"}), 404
+
+    return jsonify({"done": True}), 200
+
+
+@app.route('/members/<int:member_id>', methods=['PUT'])
+def editar_member(member_id):
+    body = request.get_json()
+
+    editar_member = jackson_family.editar_member(member_id, body)
+    if editar_member == None:
+        return jsonify({"msg": "No se encontro"}), 400
+    
+    return jsonify(editar_member), 200 
+
 
 # This only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
